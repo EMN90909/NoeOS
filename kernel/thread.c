@@ -740,6 +740,10 @@ static enum handler_return thread_sleep_handler(timer_t *timer, lk_time_t now, v
 
     t->state = THREAD_READY;
     insert_in_run_queue_head(t);
+    // It may have been pinned to another CPU while it slept, so tell that CPU.
+    if (thread_pinned_cpu(t) >= 0) {
+        wakeup_cpu_for_thread(t);
+    }
 
     THREAD_UNLOCK(state);
 
